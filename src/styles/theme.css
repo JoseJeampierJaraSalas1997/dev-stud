@@ -1,0 +1,187 @@
+/* ---------------------------------------------------------------------------
+ * Arc Telemetry HUD — design tokens
+ *
+ * Source of truth: the `designTheme` / design.md of the Stitch project
+ * "Interactive 3D Jarvis Assistant" (projects/14963888297409071918).
+ *
+ * Two deliberate deviations from the raw Stitch screen exports:
+ *
+ *   1. The desktop screen was exported with an older palette (#00a8ff primary,
+ *      Space Mono headlines). The project design system is canonical here:
+ *      arc-reactor cyan #00f0ff and Space Grotesk headlines.
+ *   2. `success` is an EXTENSION. The design system reserves amber for critical
+ *      alerts, but the mockups paint OK-states (NOMINAL, ONLINE, CRYO_STABLE)
+ *      green. Without this role we would have to break either the visual or
+ *      the semantics, so the green is promoted to a named role.
+ * ------------------------------------------------------------------------- */
+
+@theme {
+  /* -- Surfaces ---------------------------------------------------------- */
+  --color-background: #0d141d;
+  --color-on-background: #dce3f0;
+  --color-surface: #0d141d;
+  --color-surface-dim: #0d141d;
+  --color-surface-bright: #333a44;
+  --color-surface-container-lowest: #080f18;
+  --color-surface-container-low: #151c26;
+  --color-surface-container: #19202a;
+  --color-surface-container-high: #242a34;
+  --color-surface-container-highest: #2e353f;
+  --color-surface-variant: #2e353f;
+  --color-surface-tint: #00dbe9;
+  --color-on-surface: #dce3f0;
+  --color-on-surface-variant: #b9cacb;
+  --color-inverse-surface: #dce3f0;
+  --color-inverse-on-surface: #2a313b;
+
+  /* -- Outlines ---------------------------------------------------------- */
+  --color-outline: #849495;
+  --color-outline-variant: #3b494b;
+
+  /* -- Primary: arc-reactor cyan ----------------------------------------- */
+  --color-primary: #dbfcff;
+  --color-on-primary: #00363a;
+  --color-primary-container: #00f0ff;
+  --color-on-primary-container: #006970;
+  --color-inverse-primary: #006970;
+  --color-primary-fixed: #7df4ff;
+  --color-primary-fixed-dim: #00dbe9;
+  --color-on-primary-fixed: #002022;
+  --color-on-primary-fixed-variant: #004f54;
+
+  /* -- Secondary: tactical amber (critical / high priority) -------------- */
+  --color-secondary: #ffd795;
+  --color-on-secondary: #422c00;
+  --color-secondary-container: #fbb400;
+  --color-on-secondary-container: #694900;
+  --color-secondary-fixed: #ffdea9;
+  --color-secondary-fixed-dim: #ffba27;
+  --color-on-secondary-fixed: #271900;
+  --color-on-secondary-fixed-variant: #5e4100;
+
+  /* -- Tertiary: structural cyan-blue ------------------------------------ */
+  --color-tertiary: #e9f9ff;
+  --color-on-tertiary: #003642;
+  --color-tertiary-container: #96e5ff;
+  --color-on-tertiary-container: #00687e;
+  --color-tertiary-fixed: #b3ebff;
+  --color-tertiary-fixed-dim: #4cd6fb;
+  --color-on-tertiary-fixed: #001f27;
+  --color-on-tertiary-fixed-variant: #004e5f;
+
+  /* -- Error ------------------------------------------------------------- */
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  /* -- Success (extension, see header note) ------------------------------ */
+  --color-success: #00ffaa;
+  --color-success-dim: #00e296;
+  --color-on-success: #00281a;
+
+  /* -- Typography families ---------------------------------------------- */
+  --font-display-lg: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-display-lg-mobile: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-headline-md: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-headline-sm: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body-lg: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body-md: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body-sm: 'JetBrains Mono', ui-monospace, monospace;
+  --font-label-lg: 'JetBrains Mono', ui-monospace, monospace;
+  --font-label-md: 'JetBrains Mono', ui-monospace, monospace;
+  --font-label-sm: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* -- Typography scale -------------------------------------------------- */
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: 0.05em;
+
+  --text-display-lg-mobile: 32px;
+  --text-display-lg-mobile--line-height: 40px;
+  --text-display-lg-mobile--letter-spacing: 0.04em;
+
+  --text-headline-lg: 28px;
+  --text-headline-lg--line-height: 36px;
+  --text-headline-lg--letter-spacing: 0.04em;
+
+  --text-headline-md: 22px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--letter-spacing: 0.03em;
+
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 24px;
+  --text-headline-sm--letter-spacing: 0.02em;
+
+  --text-body-lg: 15px;
+  --text-body-lg--line-height: 22px;
+  --text-body-lg--letter-spacing: 0.01em;
+
+  --text-body-md: 13px;
+  --text-body-md--line-height: 18px;
+  --text-body-md--letter-spacing: 0em;
+
+  --text-body-sm: 11px;
+  --text-body-sm--line-height: 16px;
+  --text-body-sm--letter-spacing: 0.02em;
+
+  --text-label-lg: 12px;
+  --text-label-lg--line-height: 16px;
+  --text-label-lg--letter-spacing: 0.08em;
+
+  --text-label-md: 10px;
+  --text-label-md--line-height: 14px;
+  --text-label-md--letter-spacing: 0.1em;
+
+  --text-label-sm: 9px;
+  --text-label-sm--line-height: 12px;
+  --text-label-sm--letter-spacing: 0.12em;
+
+  /* -- Spacing: design-system namespace (mobile HUD markup) -------------- */
+  --spacing-space-2xs: 0.125rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.75rem;
+  --spacing-space-base: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
+  --spacing-space-2xl: 3rem;
+  --spacing-gutter-hud: 1rem;
+  --spacing-margin-screen: 1.5rem;
+  --spacing-telemetry-unit: 0.375rem;
+
+  /* -- Spacing: terminal namespace (desktop command-center markup) ------- */
+  --spacing-pad-xs: 4px;
+  --spacing-pad-sm: 8px;
+  --spacing-pad-md: 12px;
+  --spacing-pad-lg: 16px;
+  --spacing-pad-xl: 24px;
+  --spacing-pad-2xl: 32px;
+  --spacing-grid-unit: 4px;
+  --spacing-gutter-terminal: 8px;
+  --spacing-border-stroke: 1px;
+
+  /* -- Motion ------------------------------------------------------------ */
+  --animate-scanline: scanline 3.2s linear infinite;
+  --animate-radar: radar 2s ease-out infinite;
+  --animate-flicker: flicker 4s steps(1, end) infinite;
+  --animate-spin-slow: spin 60s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes radar {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: 0.45; }
+  98% { opacity: 1; }
+  99% { opacity: 0.7; }
+}

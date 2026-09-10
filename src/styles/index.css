@@ -1,0 +1,116 @@
+@import 'tailwindcss';
+@import './theme.css';
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-surface-container-lowest);
+  }
+
+  body {
+    overscroll-behavior: none;
+    color: var(--color-on-surface);
+    font-family: var(--font-body-md);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* The HUD hides its scrollbars — the aesthetic has no room for chrome. */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    scrollbar-width: none;
+  }
+
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--color-primary-container);
+    border-radius: 9999px;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary-container) 60%, transparent);
+    cursor: pointer;
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 0.75rem;
+    height: 0.75rem;
+    border: none;
+    background: var(--color-primary-container);
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+  }
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Chamfered tactical chassis: 45deg corner cuts on opposing diagonals. */
+@utility chamfer {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+@utility chamfer-sm {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+}
+
+/*
+ * Motion is decorative throughout this HUD — pulses, radar pings, scan sweeps
+ * and the WebGL scenes. Users who ask for less motion get a static readout;
+ * every number stays legible because none of it depends on animation.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
