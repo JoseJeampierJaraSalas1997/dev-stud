@@ -11,6 +11,7 @@ el proyecto sin tener que reconstruir el contexto leyendo todo el código.
 | [specs/data-contract.md](specs/data-contract.md) | Contrato HTTP/WS con el backend jharvis |
 | [specs/command-center.md](specs/command-center.md) | Spec de la pantalla `/` |
 | [specs/reactor-hud.md](specs/reactor-hud.md) | Spec de la pantalla `/hud` |
+| [specs/controles-backend.md](specs/controles-backend.md) | Spec BL-01: controles del operador como mutaciones GraphQL |
 | [specs/backlog.md](specs/backlog.md) | Brechas conocidas y trabajo pendiente priorizado |
 | [specs/_template.md](specs/_template.md) | Plantilla para nuevas specs |
 | [design/design-system.md](design/design-system.md) | Tokens, tipografía, color semántico, movimiento, primitivas |

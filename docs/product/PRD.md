@@ -66,7 +66,7 @@ el operador puede usar con confianza.
 | ID | Requisito |
 | --- | --- |
 | FR-1 | La app consume un `JharvisSnapshot` completo por frame desde un `DataSource` |
-| FR-2 | La fuente se elige por entorno (`VITE_JHARVIS_SOURCE`, `VITE_JHARVIS_URL`, `VITE_JHARVIS_WS`) |
+| FR-2 | La fuente se elige por entorno (`VITE_JHARVIS_SOURCE`, `VITE_JHARVIS_URL`, `VITE_JHARVIS_WS`, `VITE_JHARVIS_GRAPHQL`) |
 | FR-3 | El operador puede enviar comandos de texto (`POST /command`) |
 | FR-4 | El operador puede pasar a `SUPERVISED` desde el TopBar y el kill switch |
 | FR-5 | El operador puede redistribuir energía y armar/desarmar sistemas tácticos |

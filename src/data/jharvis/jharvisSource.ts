@@ -1,5 +1,12 @@
-import type { DataSource, JharvisSnapshot } from '../types'
+import type { DataSource, EnergyDistribution, JharvisSnapshot, SessionInfo, TacticalSystems } from '../types'
 import { seed } from '../mock/seed'
+
+const SET_MODE = 'mutation SetMode($mode: SessionMode!) { setMode(mode: $mode) }'
+const SET_ENERGY = 'mutation SetEnergy($input: EnergyInput!) { setEnergy(input: $input) }'
+const SET_TACTICAL = 'mutation SetTactical($input: TacticalInput!) { setTactical(input: $input) }'
+
+/** Sliders fire on every pixel; one mutation per window is plenty. */
+const COALESCE_MS = 250
 
 export interface JharvisSourceOptions {
   /** Base URL of the jharvis HTTP API, e.g. "http://localhost:8080". */
@@ -8,6 +15,8 @@ export interface JharvisSourceOptions {
   socketUrl?: string
   /** Poll period when no socket is configured. Defaults to 2000ms. */
   pollMs?: number
+  /** GraphQL endpoint for operator controls. Defaults to `{baseUrl}/graphql`. */
+  graphqlUrl?: string
 }
 
 /**
@@ -19,12 +28,17 @@ export interface JharvisSourceOptions {
  * that one document, so wiring a new backend means writing one mapper here —
  * `toSnapshot` below — and nothing else in the app changes.
  *
+ * Operator controls go the other way as GraphQL mutations (ADR-0004). They are
+ * applied optimistically; the next backend frame is authoritative.
+ *
  * Until the endpoint exists this source reports `status: 'error'` and serves
  * the design's reference frame, which makes the HUD render "LINK LOST" rather
  * than a wall of empty panels.
  */
 export function createJharvisSource(options: JharvisSourceOptions): DataSource {
   const { baseUrl, socketUrl, pollMs = 2000 } = options
+  const apiUrl = baseUrl.replace(/\/$/, '')
+  const graphqlUrl = options.graphqlUrl ?? `${apiUrl}/graphql`
 
   let snapshot: JharvisSnapshot = { ...structuredClone(seed), status: 'connecting' }
   const listeners = new Set<() => void>()
@@ -61,7 +75,7 @@ export function createJharvisSource(options: JharvisSourceOptions): DataSource {
   async function poll() {
     if (disposed) return
     try {
-      const response = await fetch(`${baseUrl.replace(/\/$/, '')}/snapshot`, {
+      const response = await fetch(`${apiUrl}/snapshot`, {
         headers: { accept: 'application/json' },
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -98,6 +112,52 @@ export function createJharvisSource(options: JharvisSourceOptions): DataSource {
     }
   }
 
+  /**
+   * GraphQL answers 200 even when a mutation is rejected, so success means an
+   * ok response, no `errors`, and a `true` result for the field.
+   */
+  async function mutate(field: string, query: string, variables: Record<string, unknown>) {
+    if (disposed) return
+    try {
+      const response = await fetch(graphqlUrl, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const body = (await response.json()) as { data?: Record<string, unknown>; errors?: unknown[] }
+      if (body.errors?.length || body.data?.[field] !== true) throw new Error(`${field} rejected`)
+    } catch {
+      fail()
+    }
+  }
+
+  /** Trailing coalescer: merges partials and sends the latest once per window. */
+  function coalesced<T extends object>(send: (pending: Partial<T>) => void) {
+    let pending: Partial<T> = {}
+    let timer: ReturnType<typeof setTimeout> | undefined
+    return {
+      push(next: Partial<T>) {
+        pending = { ...pending, ...next }
+        if (timer) return
+        timer = setTimeout(() => {
+          const batch = pending
+          pending = {}
+          timer = undefined
+          send(batch)
+        }, COALESCE_MS)
+      },
+      cancel() {
+        clearTimeout(timer)
+        timer = undefined
+        pending = {}
+      },
+    }
+  }
+
+  const energyQueue = coalesced<EnergyDistribution>((input) => void mutate('setEnergy', SET_ENERGY, { input }))
+  const tacticalQueue = coalesced<TacticalSystems>((input) => void mutate('setTactical', SET_TACTICAL, { input }))
+
   connect()
 
   return {
@@ -112,8 +172,24 @@ export function createJharvisSource(options: JharvisSourceOptions): DataSource {
       }
     },
 
+    setMode(mode: SessionInfo['mode']) {
+      publish({ ...snapshot, session: { ...snapshot.session, mode } })
+      // Never coalesced: this carries the kill switch.
+      void mutate('setMode', SET_MODE, { mode })
+    },
+
+    setEnergy(next: Partial<EnergyDistribution>) {
+      publish({ ...snapshot, energy: { ...snapshot.energy, ...next } })
+      energyQueue.push(next)
+    },
+
+    setTactical(next: Partial<TacticalSystems>) {
+      publish({ ...snapshot, tactical: { ...snapshot.tactical, ...next } })
+      tacticalQueue.push(next)
+    },
+
     submitCommand(text: string) {
-      void fetch(`${baseUrl.replace(/\/$/, '')}/command`, {
+      void fetch(`${apiUrl}/command`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ text }),
@@ -123,6 +199,8 @@ export function createJharvisSource(options: JharvisSourceOptions): DataSource {
     dispose() {
       disposed = true
       clearInterval(timer)
+      energyQueue.cancel()
+      tacticalQueue.cancel()
       socket?.close()
       listeners.clear()
     },

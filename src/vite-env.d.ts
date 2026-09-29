@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_JHARVIS_URL?: string
   /** Optional websocket URL for streaming snapshots. */
   readonly VITE_JHARVIS_WS?: string
+  /** Optional GraphQL endpoint for operator controls; defaults to `{URL}/graphql`. */
+  readonly VITE_JHARVIS_GRAPHQL?: string
 }
 
 interface ImportMeta {

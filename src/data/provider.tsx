@@ -16,6 +16,7 @@ function resolveSource(): DataSource {
     return createJharvisSource({
       baseUrl,
       socketUrl: import.meta.env.VITE_JHARVIS_WS || undefined,
+      graphqlUrl: import.meta.env.VITE_JHARVIS_GRAPHQL || undefined,
     })
   }
 

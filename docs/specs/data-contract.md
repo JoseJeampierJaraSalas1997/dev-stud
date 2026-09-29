@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Estado | v0 implementado (lectura + comando); controles pendientes (`BL-01`) |
+| Estado | v0 implementado (lectura + comando + controles GraphQL, ADR-0004) |
 | Fuente de verdad | `src/data/types.ts` — si este doc diverge, manda el código |
 | Adaptador | `src/data/jharvis/jharvisSource.ts` |
 
@@ -13,9 +13,27 @@
 | `GET {URL}/snapshot` | HTTP poll cada 2 s | Frame completo | ✅ |
 | `{WS}` | WebSocket, mensajes JSON | Mismo frame, push | ✅ reconexión fija 4 s |
 | `POST {URL}/command` | `{ "text": string }` | Orden de texto libre | ✅ sin ack |
-| `POST {URL}/mode` | `{ "mode": "AUTONOMOUS" \| "SUPERVISED" }` | Cambio de modo / kill switch | 🔲 propuesto |
-| `POST {URL}/energy` | `Partial<EnergyDistribution>` | Redistribución energética | 🔲 propuesto |
-| `POST {URL}/tactical` | `Partial<TacticalSystems>` | Sistemas tácticos | 🔲 propuesto |
+| `POST {GRAPHQL_URL}` | GraphQL `{ query, variables }` | Controles del operador: mutaciones `setMode`, `setEnergy`, `setTactical` | ✅ cliente (BL-01); `setEnergy`/`setTactical` agrupados cada 250 ms |
+
+`GRAPHQL_URL` = `VITE_JHARVIS_GRAPHQL` si está definido; si no, `{URL}/graphql`.
+
+### Mutaciones de control
+
+```graphql
+enum SessionMode { AUTONOMOUS SUPERVISED }
+input EnergyInput { propulsion: Float, armament: Float, lifeSupport: Float, mode: String }
+input TacticalInput { repulsorPowerPct: Float, unibeamChargePct: Float, shieldIntegrityPct: Float, shieldDeployed: Boolean }
+
+type Mutation {
+  setMode(mode: SessionMode!): Boolean!
+  setEnergy(input: EnergyInput!): Boolean!
+  setTactical(input: TacticalInput!): Boolean!
+}
+```
+
+Éxito = `{"data":{"<mutación>":true}}`. Cualquier otra cosa (no-2xx, `errors`,
+`false`) es fallo. El estado autoritativo llega en el siguiente frame. Detalle
+en `docs/specs/controles-backend.md`.
 
 Todas las respuestas en `application/json`. El backend debe permitir CORS
 desde el origen del HUD.
@@ -82,6 +100,7 @@ no debe enviarlo.
 | HTTP no-2xx, red caída, JSON inválido | `status: 'error'`, se conserva el último frame, se reintenta |
 | WS `close` | `status: 'error'`, reconexión cada 4 s |
 | `POST /command` falla | `status: 'error'` (no hay feedback por comando todavía) |
+| Mutación de control falla (no-2xx, `errors`, resultado ≠ `true`) | `status: 'error'`; el valor optimista se mantiene hasta el siguiente frame |
 
 ## 5. Criterios de aceptación
 
@@ -92,8 +111,8 @@ no debe enviarlo.
   `LINK LOST // RETRYING` y MobileHeader `ENLACE PERDIDO // REINTENTANDO`.
 - **DC-AC-3** Dado un payload parcial, las claves ausentes muestran valores
   del seed y la app no lanza.
-- **DC-AC-4** (pendiente `BL-01`) Al confirmar el kill switch se envía
-  `POST /mode {"mode":"SUPERVISED"}`.
+- **DC-AC-4** Al confirmar el kill switch se envía la
+  mutación `setMode(mode: SUPERVISED)` al endpoint GraphQL.
 
 ## 6. Cambios al contrato
 
